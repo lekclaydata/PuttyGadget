@@ -1,0 +1,942 @@
+
+//
+//  AppDelegate.m
+//  PuttyGadget
+//
+//  Created by Joseph Gracé on 24/01/12.
+//  Copyright (c) 2012 Claydata. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "DejalActivityView.h"
+
+#if DEBUG
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#else
+static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+#endif
+
+
+
+@interface AppDelegate()
+
+- (void)setupStream;
+- (void)teardownStream;
+
+- (void)goOnline;
+- (void)goOffline;
+
+@end
+
+
+@implementation AppDelegate
+
+
+@synthesize window = _window;
+@synthesize xmppStream;
+@synthesize xmppReconnect;
+@synthesize xmppRoster;
+@synthesize xmppRosterStorage;
+@synthesize xmppvCardTempModule;
+@synthesize xmppvCardAvatarModule;
+@synthesize xmppCapabilities;
+@synthesize xmppCapabilitiesStorage;
+
+@synthesize online_users=_online_users;
+@synthesize offline_users=_offline_users;
+@synthesize rosterFetched=_rosterFetched;
+@synthesize online_users_index=_online_users_index;
+@synthesize offline_users_index=_offline_users_index;
+@synthesize domain=_domain;
+
+@synthesize xmppPassword=_xmppPassword;
+@synthesize xmppUserName=_xmppUserName;
+
+
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    // Override point for customization after application launch.
+    return YES;
+}
+							
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+    /*
+     Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+     Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+     */
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    /*
+     Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
+     If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+     */
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+    /*
+     Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+     */
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    /*
+     Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+     */
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application
+{
+    /*
+     Called when the application is about to terminate.
+     Save data if appropriate.
+     See also applicationDidEnterBackground:.
+     */
+}
+
+///xmpp
+
+- (NSManagedObjectContext *)managedObjectContext_roster
+{
+	NSAssert([NSThread isMainThread],
+	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
+    
+	if (managedObjectContext_roster == nil)
+	{
+		managedObjectContext_roster = [[NSManagedObjectContext alloc] init];
+        
+		NSPersistentStoreCoordinator *psc = [xmppRosterStorage persistentStoreCoordinator];
+		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
+        
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(contextDidSave:)
+		                                             name:NSManagedObjectContextDidSaveNotification
+		                                           object:nil];
+	}
+    
+	return managedObjectContext_roster;
+}
+
+- (NSManagedObjectContext *)managedObjectContext_capabilities
+{
+	NSAssert([NSThread isMainThread],
+	         @"NSManagedObjectContext is not thread safe. It must always be used on the same thread/queue");
+    
+	if (managedObjectContext_capabilities == nil)
+	{
+		managedObjectContext_capabilities = [[NSManagedObjectContext alloc] init];
+        
+		NSPersistentStoreCoordinator *psc = [xmppCapabilitiesStorage persistentStoreCoordinator];
+		[managedObjectContext_roster setPersistentStoreCoordinator:psc];
+        
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		                                         selector:@selector(contextDidSave:)
+		                                             name:NSManagedObjectContextDidSaveNotification
+		                                           object:nil];
+	}
+    
+	return managedObjectContext_capabilities;
+}
+
+- (void)contextDidSave:(NSNotification *)notification
+{
+	NSManagedObjectContext *sender = (NSManagedObjectContext *)[notification object];
+    
+	if (sender != managedObjectContext_capabilities &&
+	    [sender persistentStoreCoordinator] == [managedObjectContext_roster persistentStoreCoordinator])
+	{
+		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_roster", THIS_FILE, THIS_METHOD);
+        
+		dispatch_async(dispatch_get_main_queue(), ^{
+            
+			[managedObjectContext_roster mergeChangesFromContextDidSaveNotification:notification];
+		});
+    }
+    
+	if (sender != managedObjectContext_capabilities &&
+	    [sender persistentStoreCoordinator] == [managedObjectContext_capabilities persistentStoreCoordinator])
+	{
+		DDLogVerbose(@"%@: %@ - Merging changes into managedObjectContext_capabilities", THIS_FILE, THIS_METHOD);
+        
+		dispatch_async(dispatch_get_main_queue(), ^{
+            
+			[managedObjectContext_capabilities mergeChangesFromContextDidSaveNotification:notification];
+		});
+	}
+}
+
+
+
+
+
+- (void)setupStream
+{
+    self.online_users=[[NSMutableDictionary alloc]init];
+    self.offline_users=[[NSMutableDictionary alloc]init];
+    self.rosterFetched=false;
+    self.domain=@"@puttyme.com";
+    
+    
+	NSAssert(xmppStream == nil, @"Method setupStream invoked multiple times");
+	
+	// Setup xmpp stream
+	// 
+	// The XMPPStream is the base class for all activity.
+	// Everything else plugs into the xmppStream, such as modules/extensions and delegates.
+    
+	xmppStream = [[XMPPStream alloc] init];
+	
+#if !TARGET_IPHONE_SIMULATOR
+	{
+		// Want xmpp to run in the background?
+		// 
+		// P.S. - The simulator doesn't support backgrounding yet.
+		//        When you try to set the associated property on the simulator, it simply fails.
+		//        And when you background an app on the simulator,
+		//        it just queues network traffic til the app is foregrounded again.
+		//        We are patiently waiting for a fix from Apple.
+		//        If you do enableBackgroundingOnSocket on the simulator,
+		//        you will simply see an error message from the xmpp stack when it fails to set the property.
+		
+		xmppStream.enableBackgroundingOnSocket = YES;
+	}
+#endif
+	
+	// Setup reconnect
+	// 
+	// The XMPPReconnect module monitors for "accidental disconnections" and
+	// automatically reconnects the stream for you.
+	// There's a bunch more information in the XMPPReconnect header file.
+	
+	xmppReconnect = [[XMPPReconnect alloc] init];
+	
+	// Setup roster
+	// 
+	// The XMPPRoster handles the xmpp protocol stuff related to the roster.
+	// The storage for the roster is abstracted.
+	// So you can use any storage mechanism you want.
+	// You can store it all in memory, or use core data and store it on disk, or use core data with an in-memory store,
+	// or setup your own using raw SQLite, or create your own storage mechanism.
+	// You can do it however you like! It's your application.
+	// But you do need to provide the roster with some storage facility.
+	
+	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] init];
+    
+    
+    
+    //	xmppRosterStorage = [[XMPPRosterCoreDataStorage alloc] initWithInMemoryStore];
+    
+   // xmppRosterStorage = [[XMPPRosterMemoryStorage alloc] init];
+	
+	xmppRoster = [[XMPPRoster alloc] initWithRosterStorage:xmppRosterStorage];
+	
+	xmppRoster.autoFetchRoster = YES;
+	xmppRoster.autoAcceptKnownPresenceSubscriptionRequests = YES;
+    
+	//[xmppRoster];
+    
+    
+    // Setup vCard support
+	// 
+	// The vCard Avatar module works in conjuction with the standard vCard Temp module to download user avatars.
+	// The XMPPRoster will automatically integrate with XMPPvCardAvatarModule to cache roster photos in the roster.
+	
+	xmppvCardStorage = [XMPPvCardCoreDataStorage sharedInstance];
+	xmppvCardTempModule = [[XMPPvCardTempModule alloc] initWithvCardStorage:xmppvCardStorage];
+	
+	xmppvCardAvatarModule = [[XMPPvCardAvatarModule alloc] initWithvCardTempModule:xmppvCardTempModule];
+	
+	// Setup capabilities
+	// 
+	// The XMPPCapabilities module handles all the complex hashing of the caps protocol (XEP-0115).
+	// Basically, when other clients broadcast their presence on the network
+	// they include information about what capabilities their client supports (audio, video, file transfer, etc).
+	// But as you can imagine, this list starts to get pretty big.
+	// This is where the hashing stuff comes into play.
+	// Most people running the same version of the same client are going to have the same list of capabilities.
+	// So the protocol defines a standardized way to hash the list of capabilities.
+	// Clients then broadcast the tiny hash instead of the big list.
+	// The XMPPCapabilities protocol automatically handles figuring out what these hashes mean,
+	// and also persistently storing the hashes so lookups aren't needed in the future.
+	// 
+	// Similarly to the roster, the storage of the module is abstracted.
+	// You are strongly encouraged to persist caps information across sessions.
+	// 
+	// The XMPPCapabilitiesCoreDataStorage is an ideal solution.
+	// It can also be shared amongst multiple streams to further reduce hash lookups.
+	
+	xmppCapabilitiesStorage = [XMPPCapabilitiesCoreDataStorage sharedInstance];
+    xmppCapabilities = [[XMPPCapabilities alloc] initWithCapabilitiesStorage:xmppCapabilitiesStorage];
+    
+    xmppCapabilities.autoFetchHashedCapabilities = YES;
+    xmppCapabilities.autoFetchNonHashedCapabilities = NO;
+    
+	// Activate xmpp modules
+    
+	[xmppReconnect         activate:xmppStream];
+	[xmppRoster            activate:xmppStream];
+	[xmppvCardTempModule   activate:xmppStream];
+	[xmppvCardAvatarModule activate:xmppStream];
+	[xmppCapabilities      activate:xmppStream];
+    
+	// Add ourself as a delegate to anything we may be interested in
+    
+    
+	[xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
+	[xmppRoster addDelegate:self delegateQueue:dispatch_get_main_queue()];
+    
+	// Optional:
+	// 
+	// Replace me with the proper domain and port.
+	// The example below is setup for a typical google talk account.
+	// 
+	// If you don't supply a hostName, then it will be automatically resolved using the JID (below).
+	// For example, if you supply a JID like 'user@quack.com/rsrc'
+	// then the xmpp framework will follow the xmpp specification, and do a SRV lookup for quack.com.
+	// 
+	// If you don't specify a hostPort, then the default (5222) will be used.
+	
+    //	[xmppStream setHostName:@"talk.google.com"];
+    //	[xmppStream setHostPort:5222];	
+	
+    
+	// You may need to alter these settings depending on the server you're connecting to
+	allowSelfSignedCertificates = NO;
+	allowSSLHostNameMismatch = NO;
+    
+    
+    
+    
+}
+
+- (void)teardownStream
+{
+	[xmppStream removeDelegate:self];
+	[xmppRoster removeDelegate:self];
+	
+	[xmppReconnect         deactivate];
+	[xmppRoster            deactivate];
+	[xmppvCardTempModule   deactivate];
+	[xmppvCardAvatarModule deactivate];
+	[xmppCapabilities      deactivate];
+	
+	[xmppStream disconnect];
+	
+	xmppStream = nil;
+	xmppReconnect = nil;
+    xmppRoster = nil;
+	xmppRosterStorage = nil;
+	xmppvCardStorage = nil;
+    xmppvCardTempModule = nil;
+	xmppvCardAvatarModule = nil;
+	xmppCapabilities = nil;
+	xmppCapabilitiesStorage = nil;
+    
+    //clear contact list
+    self.online_users = nil;
+    self.online_users_index=nil;
+    self.offline_users=nil;
+    self.offline_users_index=nil;
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"getPresence" object:nil];  //ask master view to refresh
+    
+    
+    
+}
+
+// It's easy to create XML elments to send and to read received XML elements.
+// You have the entire NSXMLElement and NSXMLNode API's.
+// 
+// In addition to this, the NSXMLElement+XMPP category provides some very handy methods for working with XMPP.
+// 
+// On the iPhone, Apple chose not to include the full NSXML suite.
+// No problem - we use the KissXML library as a drop in replacement.
+// 
+// For more information on working with XML elements, see the Wiki article:
+// http://code.google.com/p/xmppframework/wiki/WorkingWithElements
+
+- (void)goOnline
+{
+	XMPPPresence *presence = [XMPPPresence presence]; // type="available" is implicit
+	
+	[[self xmppStream] sendElement:presence];
+}
+
+- (void)goOffline
+{
+	XMPPPresence *presence = [XMPPPresence presenceWithType:@"unavailable"];
+	
+	[[self xmppStream] sendElement:presence];
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark Connect/disconnect
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+- (BOOL)connect:(NSString *)user pwd:(NSString *)pwd
+{
+	if (![xmppStream isDisconnected]) {
+		return YES;
+	}
+    
+	NSString *myJID = [user stringByAppendingString:@"@puttyme.com"];//@"anj@puttyme.com";
+	NSString *myPassword = pwd;//@"clay2899" ;  
+    
+    
+    ////
+    if(self.xmppUserName!=NULL) myJID=self.xmppUserName;
+    if(self.xmppPassword!=NULL) myPassword=self.xmppPassword;
+    
+    
+    ///
+	//
+	// If you don't want to use the Settings view to set the JID, 
+	// uncomment the section below to hard code a JID and password.
+	// 
+	// myJID = @"user@gmail.com/xmppframework";
+	// myPassword = @"";
+	
+	if (myJID == nil || myPassword == nil) {
+		return NO;
+	}
+    
+	[xmppStream setMyJID:[XMPPJID jidWithString:myJID]];
+	password = myPassword;
+    
+	NSError *error = nil;
+	if (![xmppStream connect:&error])
+	{
+		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error connecting" 
+		                                                    message:@"See console for error details." 
+		                                                   delegate:nil 
+		                                          cancelButtonTitle:@"Ok" 
+		                                          otherButtonTitles:nil];
+		[alertView show];
+        
+		DDLogError(@"Error connecting: %@", error);
+        
+		return NO;
+	}
+    
+       
+	return YES;
+}
+
+- (void)disconnect
+{
+	[self goOffline];
+	[xmppStream disconnect];
+    
+}
+
+- (void)xmppStream:(XMPPStream *)sender socketDidConnect:(GCDAsyncSocket *)socket 
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)xmppStream:(XMPPStream *)sender willSecureWithSettings:(NSMutableDictionary *)settings
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	if (allowSelfSignedCertificates)
+	{
+		[settings setObject:[NSNumber numberWithBool:YES] forKey:(NSString *)kCFStreamSSLAllowsAnyRoot];
+	}
+	
+	if (allowSSLHostNameMismatch)
+	{
+		[settings setObject:[NSNull null] forKey:(NSString *)kCFStreamSSLPeerName];
+	}
+	else
+	{
+		// Google does things incorrectly (does not conform to RFC).
+		// Because so many people ask questions about this (assume xmpp framework is broken),
+		// I've explicitly added code that shows how other xmpp clients "do the right thing"
+		// when connecting to a google server (gmail, or google apps for domains).
+		
+		NSString *expectedCertName = nil;
+		
+		NSString *serverDomain = xmppStream.hostName;
+		NSString *virtualDomain = [xmppStream.myJID domain];
+		
+		if ([serverDomain isEqualToString:@"talk.google.com"])
+		{
+			if ([virtualDomain isEqualToString:@"gmail.com"])
+			{
+				expectedCertName = virtualDomain;
+			}
+			else
+			{
+				expectedCertName = serverDomain;
+			}
+		}
+		else if (serverDomain == nil)
+		{
+			expectedCertName = virtualDomain;
+		}
+		else
+		{
+			expectedCertName = serverDomain;
+		}
+		
+		if (expectedCertName)
+		{
+			[settings setObject:expectedCertName forKey:(NSString *)kCFStreamSSLPeerName];
+		}
+	}
+}
+
+- (void)xmppStreamDidSecure:(XMPPStream *)sender
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)xmppStreamDidConnect:(XMPPStream *)sender
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	isXmppConnected = YES;
+	
+	NSError *error = nil;
+	
+	if (![[self xmppStream] authenticateWithPassword:password error:&error])
+	{
+		DDLogError(@"Error authenticating: %@", error);
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"connectFailed" object:error];
+	}
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"connectSuccess" object:nil];
+  
+
+}
+
+- (void)xmppStreamDidAuthenticate:(XMPPStream *)sender
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	[self goOnline];
+}
+
+- (void)xmppStream:(XMPPStream *)sender didNotAuthenticate:(NSXMLElement *)error
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (BOOL)xmppStream:(XMPPStream *)sender didReceiveIQ:(XMPPIQ *)iq
+{
+	DDLogVerbose(@"%@: %@ - %@", THIS_FILE, THIS_METHOD);
+	
+	return NO;
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveMessage:(XMPPMessage *)message
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+    
+	// A simple example of inbound message handling.
+    
+	if ([message isChatMessageWithBody])
+	{
+		/*XMPPUserCoreDataStorageObject *user = [xmppRosterStorage userForJID:[message from]
+         xmppStream:xmppStream
+         managedObjectContext:[self managedObjectContext_roster]];*/
+		
+		NSString *body = [[message elementForName:@"body"] stringValue];
+        //	NSString *displayName = [user displayName];
+        
+		/*if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+         {
+         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+         message:body 
+         delegate:nil 
+         cancelButtonTitle:@"Ok" 
+         otherButtonTitles:nil];
+         [alertView show];
+         }
+         else
+         {
+         // We are not active, so use a local notification instead
+         UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+         localNotification.alertAction = @"Ok";
+         localNotification.alertBody = [NSString stringWithFormat:@"From: %@\n\n%@",displayName,body];
+         
+         [[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+         }*/
+        
+        NSMutableDictionary *m = [[NSMutableDictionary alloc] init];
+        
+        NSLog(@"Message From:%@ , %@",[[message from] bare],body);
+       // NSArray *from=[[[message from] bare] componentsSeparatedByString:@"@"];
+		[m setObject:body forKey:@"msg"];
+		[m setObject:[[message from] bare] forKey:@"sender"];
+        //[message 
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"getMessage" object:m];
+		//[m setObject:[self getCurrentTime] forKey:@"time"];
+        
+        
+        
+	}
+}
+
+
+- (void)xmppStream:(XMPPStream *)sender didReceivePresence:(XMPPPresence *)presence
+{
+    if(!self.rosterFetched)    
+    {
+        [self fetchedResultsController];
+        self.rosterFetched=true; //only do once
+        [self.online_users removeObjectForKey:[[self.xmppStream myJID]bare]];
+        [self.offline_users removeObjectForKey:[[self.xmppStream myJID]bare]];
+    }
+    
+    
+	//DDLogVerbose(@"%@: %@ - %@", THIS_FILE, THIS_METHOD, [presence fromStr]);
+   // NSLog(@"GetPresence: %@",presence);
+    
+  //  NSLog(@"Rosters1:%@",self.xmppRoster);
+  //  NSLog(@"R2:%@",self.xmppRosterStorage);
+    
+   // [self.xmppRoster fetchRoster];
+    
+    
+
+   // NSMutableSet *s=[self.xmppRoste
+    
+    
+//	NSString *presenceType = [presence type]; // online/offline
+	NSString *myUsername = [[sender myJID] user];
+	NSString *presenceFromUser = [[presence from] user];
+    NSLog(@"didReceivePresence %@ %@ %@",presence,myUsername,presenceFromUser);
+ /*  XMPPUserCoreDataStorageObject *user = [self.xmppRosterStorage userForJID:[sender myJID] xmppStream:self.xmppStream managedObjectContext:[self managedObjectContext_roster]];
+	NSLog(@"UUUU  %@",user);
+	NSLog(@"11111 %@",[user nickname]);*/
+                       
+    
+    if (![presenceFromUser isEqualToString:myUsername]) {
+		
+            /*if ([presenceType isEqualToString:@"available"]) {
+             
+             //[_chatDelegate newBuddyOnline:[NSString stringWithFormat:@"%@@%@", presenceFromUser, @"puttyme.com"]];
+             
+             
+             } else if ([presenceType isEqualToString:@"unavailable"]) {
+             
+             //[_chatDelegate buddyWentOffline:[NSString stringWithFormat:@"%@@%@", presenceFromUser, @"puttyme.com"]];
+             
+             }*/
+
+         NSLog(@"didReceivePresence2 %@ %@ %@",[[presence from] bare],myUsername,presenceFromUser);
+        if([self.online_users objectForKey:[[presence from] bare]]!=NULL)
+        {
+            //user in online group
+            
+            if([[presence type] isEqualToString: @"unavailable"] )
+            {
+                //move to offline group
+                NSMutableDictionary *new=[[self.online_users objectForKey:[[presence from] bare]]mutableCopy];
+                [new setObject:@"unavailable" forKey:@"status"];
+                [self.online_users removeObjectForKey:[[presence from] bare]];
+                [self.offline_users setObject:new forKey:[[presence from] bare]];
+                
+                
+            }
+        }
+        else if([self.offline_users objectForKey:[[presence from] bare]]!=NULL)
+        {
+            //user in offline group
+            if([[presence type] isEqualToString: @"available"] )
+            {
+                //move to online group
+                NSMutableDictionary *new=[[self.offline_users objectForKey:[[presence from] bare]] mutableCopy];
+                [new setObject:@"available" forKey:@"status"];
+                [self.offline_users removeObjectForKey:[[presence from] bare]];
+                [self.online_users setObject:new forKey:[[presence from] bare]];
+                
+            }
+            
+
+        }
+
+        NSLog(@"Current ONLINE:%@",self.online_users);
+
+        NSLog(@"Current OFFLINE:%@",self.offline_users);
+
+        self.online_users_index=[self.online_users allKeys];
+        self.offline_users_index=[self.offline_users allKeys] ;
+        
+        [self sortUserIndices];
+
+        //NSArray *temp=[[NSArray alloc] initWithObjects:presenceFromUser,presenceType, nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"getPresence" object:nil];
+
+    }
+}
+
+- (void)sortUserIndices
+{
+    
+   // NSLog(@"Before Sorted ONLINE:%@",self.online_users_index);
+    
+  //  NSLog(@"Before Sorted OFFLINE:%@",self.offline_users_index);
+
+    self.online_users_index=[self.online_users_index sortedArrayUsingComparator:^NSComparisonResult(id obj1,id obj2)
+         {
+             NSString *a=[[self.online_users objectForKey:obj1]objectForKey:@"nickname"];
+             NSString *b=[[self.online_users objectForKey:obj2]objectForKey:@"nickname"];
+             
+         //    NSLog(@"A: %@ B: %@",a,b);
+             return [a compare:b];
+         
+         }];
+    
+    self.offline_users_index=[self.offline_users_index sortedArrayUsingComparator:^NSComparisonResult(id obj1,id obj2)
+     {
+         NSString *a=[[self.offline_users objectForKey:obj1]objectForKey:@"nickname"];
+         NSString *b=[[self.offline_users objectForKey:obj2]objectForKey:@"nickname"];
+        //  NSLog(@"A2: %@ B2: %@",a,b);
+         return [a compare:b];
+         
+     }];
+    
+  //  NSLog(@"Sorted ONLINE:%@",self.online_users_index);
+    
+  //  NSLog(@"Sorted OFFLINE:%@", self.offline_users_index);
+
+}
+
+- (void)xmppStream:(XMPPStream *)sender didReceiveError:(id)error
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+}
+
+- (void)xmppStreamDidDisconnect:(XMPPStream *)sender withError:(NSError *)error
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+	if (!isXmppConnected)
+	{
+		DDLogError(@"Unable to connect to server. Check xmppStream.hostName");
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark XMPPRosterDelegate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+- (void)xmppRoster:(XMPPRoster *)sender didReceiveBuddyRequest:(XMPPPresence *)presence
+{
+	DDLogVerbose(@"%@: %@", THIS_FILE, THIS_METHOD);
+	
+/*	XMPPUserCoreDataStorageObject *user = [xmppRosterStorage userForJID:[presence from]
+	                                                         xmppStream:xmppStream
+	                                               managedObjectContext:[self managedObjectContext_roster]];
+	
+	NSString *displayName = [user displayName];
+	NSString *jidStrBare = [presence fromStr];
+	NSString *body = nil;
+	
+	if (![displayName isEqualToString:jidStrBare])
+	{
+		body = [NSString stringWithFormat:@"Buddy request from %@ <%@>", displayName, jidStrBare];
+	}
+	else
+	{
+		body = [NSString stringWithFormat:@"Buddy request from %@", displayName];
+	}
+	
+	
+	if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+	{
+		UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:displayName
+		                                                    message:body 
+		                                                   delegate:nil 
+		                                          cancelButtonTitle:@"Not implemented"
+		                                          otherButtonTitles:nil];
+		[alertView show];
+	} 
+	else 
+	{
+		// We are not active, so use a local notification instead
+		UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+		localNotification.alertAction = @"Not implemented";
+		localNotification.alertBody = body;
+		
+		[[UIApplication sharedApplication] presentLocalNotificationNow:localNotification];
+	}*/
+	
+}
+
+-(BOOL)sendMessage:(NSString *)content To:(NSString *)to
+{
+
+    //[self fetchedResultsController];
+    if([content length] > 0 &&[to length]>0) {
+        NSLog(@"Message:%@ Sendto:%@",content,to);
+		
+        NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
+        [body setStringValue:content];
+		
+        NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
+        [message addAttributeWithName:@"type" stringValue:@"chat"];
+        [message addAttributeWithName:@"to" stringValue:to];
+        [message addChild:body];
+		
+        [self.xmppStream sendElement:message];
+        return true;
+    }
+    
+    
+    return false;
+    
+}
+
+
+
+
+- (NSFetchedResultsController *)fetchedResultsController
+{
+    NSManagedObjectContext *moc = [self  managedObjectContext_roster];
+    
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"XMPPUserCoreDataStorageObject"
+                                              inManagedObjectContext:moc];
+    
+    NSSortDescriptor *sd1 = [[NSSortDescriptor alloc] initWithKey:@"displayName" ascending:YES];
+    //NSSortDescriptor *sd2 = [[NSSortDescriptor alloc] initWithKey:@"displayName" ascending:YES];
+    
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:sd1, nil];
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setSortDescriptors:sortDescriptors];
+    [fetchRequest setFetchBatchSize:10];
+    
+    fetchedGroupResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest
+                                                                        managedObjectContext:moc
+                                                                          sectionNameKeyPath:@"jid"
+                                                                                   cacheName:nil];
+    [fetchedGroupResultsController setDelegate:self];
+    
+    NSError *error = nil;
+    if (![fetchedGroupResultsController performFetch:&error])
+    {
+        NSLog(@"Error performing fetch: %@", error);
+    }
+    
+    for(int i=0;i<[[fetchedGroupResultsController fetchedObjects] count];i++)
+    {
+        XMPPUserCoreDataStorageObject *u = [[fetchedGroupResultsController fetchedObjects]objectAtIndex:i];
+        XMPPResourceCoreDataStorageObject *r=[u primaryResource];
+       // NSLog(@"UUUU: %@,%@,%@,%@",[u jidStr],[u nickname],[u photo],[r status]);
+        
+        /*XMPPvCardTemp *vCardTemp = [xmppvCardTempModule fetchvCardTempForJID:[u jid]];
+        if(vCardTemp != nil && ![vCardTemp isKindOfClass:[XMPPvCardTemp class]])
+        {
+            vCardTemp = [XMPPvCardTemp vCardTempFromElement:vCardTemp];
+            NSLog(@"PHOTO: %@",vCardTemp.photo);
+        }*/
+       
+      
+        
+       // NSArray *details=[[NSArray alloc]initWithObjects:[u nickname],[u photo],[r status], nil];
+        NSMutableDictionary *details=[[NSMutableDictionary alloc]init];
+        if([u nickname]!=NULL)[details setObject:[u nickname] forKey:@"nickname"];
+        if([u photo]!=NULL)[details setObject:[u photo] forKey:@"photo"];
+        if([r status]!=NULL)[details setObject:[r status] forKey:@"status"];
+        if(r!=NULL)
+        {
+            //user is online
+            [details setObject:@"1" forKey:@"online"];
+            [self.online_users setObject:details forKey:[u jidStr]];
+            
+        }
+        else
+        {
+            [details setObject:@"0" forKey:@"online"];
+            [self.offline_users setObject:details forKey:[u jidStr]];
+        }
+        
+        
+        
+    }
+    NSLog(@"ONLINE:%@",self.online_users);
+    
+    NSLog(@"OFFLINE:%@",self.offline_users);
+    
+    
+    
+  /*  NSArray *keys=[self.online_users allKeys];
+    
+     NSLog(@"ONLINE Keys:%@",keys);
+    
+    keys=[self.offline_users allKeys];
+    
+    NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:FIRST  ascending:YES];
+    keys=[self.online_users ];
+    
+    NSLog(@"offline Keys:%@",keys);*/
+    
+    
+    return fetchedGroupResultsController;
+}
+
+-(NSMutableDictionary *)getOnlineUsers
+{
+    return self.online_users;
+}
+
+-(NSMutableDictionary *)getOfflineUsers
+{
+    
+    return self.offline_users;
+}
+
+//xmpp
+
+-(BOOL) application:(UIApplication *)application handleOpenURL:(NSURL *) url
+{
+    NSLog(@"USERDEF:%@",[[NSUserDefaults standardUserDefaults]stringForKey:@"enabled_preference]"]);
+    NSLog(@"Application Receive URL: %@",url);
+   
+    NSMutableDictionary *queryData=[[NSMutableDictionary alloc]init];
+    for(NSString *query in [[url query]componentsSeparatedByString:@"&"])
+    {
+        NSArray *item=[query componentsSeparatedByString:@"="];
+        if([item count]<2)continue;
+        else
+        {
+            [queryData setValue:[item objectAtIndex:1] forKey:[item objectAtIndex:0]];
+        }
+    }
+     [DejalBezelActivityView removeViewAnimated:NO];
+    NSLog(@"QueryData:%@",queryData);
+    
+    if([[queryData valueForKey:@"result"]isEqualToString:@"loginFailed"])
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"lf" object:queryData];
+    }
+    else if([[queryData valueForKey:@"result"]isEqualToString:@"loginSuccess"])
+    {
+    
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ls" object:queryData];
+  
+    }
+    else if([queryData valueForKey:@"action"]!=NULL)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"handleRequestLinkAction" object:queryData];
+    }
+    
+    return NO;
+}
+
+
+@end

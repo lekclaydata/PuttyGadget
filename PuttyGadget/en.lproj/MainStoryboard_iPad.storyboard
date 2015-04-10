@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" initialViewController="4">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3746"/>
+    </dependencies>
+    <scenes>
+        <!--Scanner View Controller-->
+        <scene sceneID="Vet-Ys-ENP">
+            <objects>
+                <viewController id="jNT-jo-ftb" customClass="ScannerViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="JSY-FP-8ko">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <nil key="simulatedStatusBarMetrics"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="J0D-c9-b2c" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3178" y="5053"/>
+        </scene>
+        <!--Uploade Cabinet Controller - PuttyGateway-->
+        <scene sceneID="M3J-0V-Cu6">
+            <objects>
+                <viewController id="ePO-4O-e5u" customClass="UploadeCabinetController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="iYu-mr-hfh">
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" id="O0I-d1-Obh">
+                                <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" id="Db4-25-17R">
+                                        <rect key="frame" x="153" y="518" width="184" height="136"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    </imageView>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Image:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="2tP-Jb-vz5">
+                                        <rect key="frame" x="60" y="574" width="76" height="24"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Audio:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="gBY-QM-s6J">
+                                        <rect key="frame" x="469" y="574" width="76" height="24"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" id="qhc-an-hZk">
+                                        <rect key="frame" x="586" y="571" width="176" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="Na3-Wy-Lky">
+                                        <rect key="frame" x="859" y="570" width="94" height="32"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="Audio Play">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="AudioPlayButtonPressed:" destination="ePO-4O-e5u" eventType="touchUpInside" id="Szj-c5-Mcl"/>
+                                        </connections>
+                                    </button>
+                                    <toolbar clipsSubviews="YES" contentMode="scaleToFill" id="2wE-On-P68">
+                                        <rect key="frame" x="0.0" y="673" width="1024" height="44"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                        <items>
+                                            <barButtonItem systemItem="action" id="GSm-cw-BOh">
+                                                <connections>
+                                                    <action selector="UploadButtonPressed:" destination="ePO-4O-e5u" id="zft-rs-4k8"/>
+                                                </connections>
+                                            </barButtonItem>
+                                            <barButtonItem style="plain" systemItem="flexibleSpace" id="Rce-K4-ruc"/>
+                                            <barButtonItem image="second.png" id="ZJe-sI-PNd">
+                                                <connections>
+                                                    <action selector="RadioStopButtonPressed:" destination="ePO-4O-e5u" id="00W-Yq-quq"/>
+                                                </connections>
+                                            </barButtonItem>
+                                            <barButtonItem image="first.png" id="Y2G-Dg-1zK">
+                                                <connections>
+                                                    <action selector="RadioRecordButtonPressed:" destination="ePO-4O-e5u" id="o1D-GM-AeF"/>
+                                                </connections>
+                                            </barButtonItem>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="xaE-ea-TmX"/>
+                                            <barButtonItem systemItem="camera" id="Oc6-rl-ZaD">
+                                                <connections>
+                                                    <action selector="ImageCaptureButtonPressed:" destination="ePO-4O-e5u" id="o9B-5J-eAO"/>
+                                                </connections>
+                                            </barButtonItem>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="JSi-Z0-y8J"/>
+                                        </items>
+                                    </toolbar>
+                                    <navigationBar contentMode="scaleToFill" id="jrN-1t-z2A">
+                                        <rect key="frame" x="0.0" y="0.0" width="1024" height="44"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                        <textAttributes key="titleTextAttributes">
+                                            <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                        </textAttributes>
+                                        <items>
+                                            <navigationItem title="PuttyGateway" id="xlb-94-4xE"/>
+                                        </items>
+                                    </navigationBar>
+                                    <webView contentMode="scaleAspectFit" id="PSq-cz-mGp">
+                                        <rect key="frame" x="0.0" y="44" width="1024" height="458"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    </webView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="dPb-Lq-bcL">
+                                        <rect key="frame" x="371" y="579" width="15" height="17"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" image="delete.png">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="ImageResetButtonPressed:" destination="ePO-4O-e5u" eventType="touchUpInside" id="xzc-oW-bGM"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="V1T-bV-rYK">
+                                        <rect key="frame" x="802" y="577" width="15" height="17"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" image="delete.png">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="AudioResetButtonPressed:" destination="ePO-4O-e5u" eventType="touchUpInside" id="gjs-zk-6sk"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="PuttyGateway" image="gateway.png" id="GpH-Pc-k3A"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics" orientation="landscapeRight"/>
+                    <connections>
+                        <outlet property="AudioPlayButton" destination="Na3-Wy-Lky" id="wBs-Nm-0mD"/>
+                        <outlet property="ImageView" destination="Db4-25-17R" id="czi-B9-Q3p"/>
+                        <outlet property="RadioRecFilesResult" destination="qhc-an-hZk" id="hkN-s4-R8a"/>
+                        <outlet property="RaidoRecordButton" destination="Y2G-Dg-1zK" id="gU3-Z6-86C"/>
+                        <outlet property="RaidoStopButton" destination="ZJe-sI-PNd" id="DPv-7K-k2i"/>
+                        <outlet property="UploadButton" destination="GSm-cw-BOh" id="2SR-pr-FuZ"/>
+                        <outlet property="WebView" destination="PSq-cz-mGp" id="QTT-XP-w2O"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="y5d-do-Ras" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2105" y="3185"/>
+        </scene>
+        <!--Home View Controller - Home-->
+        <scene sceneID="8tA-KV-yED">
+            <objects>
+                <viewController title="Home" id="btg-FW-UoU" customClass="HomeViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XXc-oF-oSB">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="G1t-de-yvy">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <items>
+                                    <barButtonItem title="PuttyGadget 0.1b" style="plain" id="x5P-G1-iPW"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Ns1-UK-8rM"/>
+                                    <barButtonItem title="PuttyEnterprise" style="plain" id="Bms-8d-2tV">
+                                        <connections>
+                                            <action selector="TitleButtonClicked:" destination="btg-FW-UoU" id="ubD-Pn-QAj"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="h84-8n-jj8"/>
+                                    <barButtonItem title="Signin" id="bET-oA-FB2">
+                                        <connections>
+                                            <action selector="loginButtonPressed:" destination="btg-FW-UoU" id="9e6-me-CFV"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Home" image="house.png" id="asR-g1-Ird"/>
+                    <toolbarItems/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="TitleButton" destination="Bms-8d-2tV" id="Qqk-z6-ay4"/>
+                        <outlet property="loginButton" destination="bET-oA-FB2" id="cdq-Qx-TQG"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="aee-ek-m3u" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3192" y="2583"/>
+        </scene>
+        <!--Patient Info View Controller-->
+        <scene sceneID="bON-dc-dBj">
+            <objects>
+                <viewController modalPresentationStyle="pageSheet" id="XNl-D5-GyG" customClass="PatientInfoViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="OWd-e1-mFV">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="1ky-Pk-vwy">
+                                <rect key="frame" x="242" y="42" width="195" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Release Current Patient">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="ReleasePatientButtonClicked:" destination="XNl-D5-GyG" eventType="touchUpInside" id="fTY-rn-lJN"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <value key="contentSizeForViewInPopover" type="size" width="400" height="400"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <outlet property="ReleasePatientButton" destination="1ky-Pk-vwy" id="0Zr-Sz-dUI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Ui6-Ni-L1m" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3178" y="3862"/>
+        </scene>
+        <!--Day Sheet View Controller - DaySheet-->
+        <scene sceneID="oQH-XT-N0T">
+            <objects>
+                <viewController id="vXC-tr-gA2" customClass="DaySheetViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="5ao-wO-SJ3">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <webView contentMode="scaleToFill" id="YsY-yH-XHm">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="927"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </webView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="TZW-Ap-hF1">
+                                <rect key="frame" x="0.0" y="927" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="mRa-1l-ewG"/>
+                                    <barButtonItem image="arrowleft.png" style="plain" id="dBo-H2-GoW">
+                                        <connections>
+                                            <action selector="goBack" destination="YsY-yH-XHm" id="FUy-IW-Dp4"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="mMz-2H-0ba"/>
+                                    <barButtonItem image="delete.png" style="plain" id="bq9-xA-DFp">
+                                        <connections>
+                                            <action selector="stopLoading" destination="YsY-yH-XHm" id="eBp-CC-Rya"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="S8C-JM-jh5"/>
+                                    <barButtonItem image="arrowright.png" style="plain" id="Jnw-r8-Jhu">
+                                        <connections>
+                                            <action selector="goForward" destination="YsY-yH-XHm" id="nio-93-Sox"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="ws9-p7-Edr"/>
+                                    <barButtonItem image="reload.png" style="plain" id="mOH-jV-wNK">
+                                        <connections>
+                                            <action selector="reload" destination="YsY-yH-XHm" id="bvt-NS-3of"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Jxr-Zu-hTN"/>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="DaySheet" image="clock.png" id="HBB-LA-qtQ"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
+                    <connections>
+                        <outlet property="WebView" destination="YsY-yH-XHm" id="JNo-iD-eI6"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="KlQ-nL-CiK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3178" y="75"/>
+        </scene>
+        <!--Second View Controller - Putty Enterprise-->
+        <scene sceneID="13">
+            <objects>
+                <viewController id="3" customClass="SecondViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="16">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <webView multipleTouchEnabled="YES" contentMode="scaleToFill" id="oGx-00-h5f">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="930"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            </webView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="W9v-dP-XlO">
+                                <rect key="frame" x="0.0" y="930" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="ZKa-5i-Lrg"/>
+                                    <barButtonItem image="arrowleft.png" style="plain" id="ofw-Jt-KhW">
+                                        <connections>
+                                            <action selector="goBack" destination="oGx-00-h5f" id="HAa-3p-6Lh"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="KWt-bX-Vsp"/>
+                                    <barButtonItem image="delete.png" style="plain" id="kSB-kd-Zh2">
+                                        <connections>
+                                            <action selector="stopLoading" destination="oGx-00-h5f" id="4oo-gs-8Bx"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="4G3-wu-Sem"/>
+                                    <barButtonItem image="arrowright.png" style="plain" id="6RC-MJ-bEm">
+                                        <connections>
+                                            <action selector="goForward" destination="oGx-00-h5f" id="wI7-Cb-aal"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="roI-Xo-bPG"/>
+                                    <barButtonItem image="reload.png" style="plain" id="Rgi-Fi-yHO">
+                                        <connections>
+                                            <action selector="reload" destination="oGx-00-h5f" id="AyP-7X-bNc"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="18x-3y-flE"/>
+                                    <barButtonItem title="Print" id="8gN-Xf-37e">
+                                        <connections>
+                                            <action selector="PrintButtonClicked:" destination="3" id="oma-71-B6E"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Putty Enterprise" image="PuttyEnterprise_32.png" id="6"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <outlet property="PrintButton" destination="8gN-Xf-37e" id="oy3-1e-s05"/>
+                        <outlet property="WebContent" destination="oGx-00-h5f" id="SoY-B0-ivI"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="12" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3178" y="1304"/>
+        </scene>
+        <!--Chat Detail View Controller-->
+        <scene sceneID="m7e-CW-yG5">
+            <objects>
+                <viewController id="N4S-jc-36h" customClass="ChatDetailViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="x6O-R5-S7t">
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="HPY-qk-urI">
+                                <rect key="frame" x="0.0" y="44" width="768" height="980"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="dRV-GG-sqz">
+                                        <rect key="frame" x="0.0" y="0.0" width="768" height="740"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </tableView>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" text="Test Message" id="LLb-dV-KCq">
+                                        <rect key="frame" x="10" y="805" width="562" height="128"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <color key="backgroundColor" red="0.82774286684782605" green="0.82774286684782605" blue="0.82774286684782605" alpha="1" colorSpace="calibratedRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="oQZ-5L-JVE">
+                                        <rect key="frame" x="600" y="835" width="107" height="67"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="31"/>
+                                        <state key="normal" title="Send">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="MessageSendButtonClicked:" destination="N4S-jc-36h" eventType="touchUpInside" id="jFj-Ie-7tg"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="SXP-64-yTq">
+                                        <rect key="frame" x="698" y="835" width="59" height="67"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="33"/>
+                                        <state key="normal" title="V">
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                    </button>
+                                </subviews>
+                            </scrollView>
+                            <navigationBar contentMode="scaleToFill" id="1Il-7b-mic">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <textAttributes key="titleTextAttributes">
+                                    <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                </textAttributes>
+                                <items>
+                                    <navigationItem title="PuttyConnect" id="5qO-Y2-0ku">
+                                        <barButtonItem key="rightBarButtonItem" title="Connect" id="YAM-n1-7VQ">
+                                            <connections>
+                                                <action selector="ConnectButtonClicked:" destination="N4S-jc-36h" id="SNb-DS-6EL"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="ConnectButton" destination="YAM-n1-7VQ" id="Adm-zA-Zzl"/>
+                        <outlet property="MessageSendButton" destination="oQZ-5L-JVE" id="DsB-Nz-xyT"/>
+                        <outlet property="MessageTableView" destination="dRV-GG-sqz" id="5hK-zw-OZt"/>
+                        <outlet property="MessageTextField" destination="LLb-dV-KCq" id="3EZ-Yj-U04"/>
+                        <outlet property="NavigationBar" destination="1Il-7b-mic" id="kXJ-j4-umP"/>
+                        <outlet property="ScrollView" destination="HPY-qk-urI" id="as8-dE-SVL"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NAL-8C-2Hp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4908" y="-402"/>
+        </scene>
+        <!--Chat Master View Controller - Contact List-->
+        <scene sceneID="qv9-OF-rWP">
+            <objects>
+                <tableViewController clearsSelectionOnViewWillAppear="NO" id="zCh-tA-Fkd" customClass="ChatMasterViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="WxH-oo-PaJ">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <searchBar key="tableHeaderView" contentMode="redraw" showsCancelButton="YES" id="hmh-Pd-3ZI">
+                            <rect key="frame" x="0.0" y="44" width="320" height="44"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            <textInputTraits key="textInputTraits"/>
+                            <connections>
+                                <outlet property="delegate" destination="zCh-tA-Fkd" id="obc-Qx-fAe"/>
+                            </connections>
+                        </searchBar>
+                        <connections>
+                            <outlet property="dataSource" destination="zCh-tA-Fkd" id="bsH-6r-CkI"/>
+                            <outlet property="delegate" destination="zCh-tA-Fkd" id="3tP-3p-BR3"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" title="Contact List" id="hOt-CS-4nf"/>
+                    <connections>
+                        <outlet property="searchDisplayController" destination="XQi-xe-aJP" id="9WV-EL-mw1"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vHf-SR-qe2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="XQi-xe-aJP">
+                    <connections>
+                        <outlet property="delegate" destination="zCh-tA-Fkd" id="Jjf-di-w44"/>
+                        <outlet property="searchBar" destination="hmh-Pd-3ZI" id="Ev1-R8-32q"/>
+                        <outlet property="searchContentsController" destination="zCh-tA-Fkd" id="lHQ-6z-Yij"/>
+                        <outlet property="searchResultsDataSource" destination="zCh-tA-Fkd" id="l89-Lr-Fyt"/>
+                        <outlet property="searchResultsDelegate" destination="zCh-tA-Fkd" id="JXs-jV-HVy"/>
+                    </connections>
+                </searchDisplayController>
+            </objects>
+            <point key="canvasLocation" x="5368" y="-1496"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="fgQ-vT-C4L">
+            <objects>
+                <navigationController id="Az8-jS-NXp" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="3xY-uc-Nvc">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="zCh-tA-Fkd" kind="relationship" relationship="rootViewController" id="mda-Ze-gZn"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zgE-bY-Whm" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4908" y="-1496"/>
+        </scene>
+        <!--Split View Controller - PuttyConnect-->
+        <scene sceneID="hAY-bJ-w4a">
+            <objects>
+                <splitViewController id="NKN-zf-j1P" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="PuttyConnect" image="PuttyConnect_32.png" id="RiX-yY-9U5"/>
+                    <toolbarItems/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <connections>
+                        <segue destination="Az8-jS-NXp" kind="relationship" relationship="masterViewController" id="rxe-wr-o09"/>
+                        <segue destination="N4S-jc-36h" kind="relationship" relationship="detailViewController" id="fuN-n0-evu"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4WO-8K-I6t" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3178" y="-1185"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="15">
+            <objects>
+                <tabBarController id="4" sceneMemberID="viewController">
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="5">
+                        <rect key="frame" x="0.0" y="975" width="768" height="49"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    </tabBar>
+                    <connections>
+                        <outlet property="delegate" destination="14" id="345-4z-GqB"/>
+                        <segue destination="btg-FW-UoU" kind="relationship" relationship="viewControllers" id="Icb-LJ-3DZ"/>
+                        <segue destination="3" kind="relationship" relationship="viewControllers" id="LIq-jb-Gp9"/>
+                        <segue destination="vXC-tr-gA2" kind="relationship" relationship="viewControllers" id="iWf-n6-cyK"/>
+                        <segue destination="NKN-zf-j1P" kind="relationship" relationship="viewControllers" id="MbD-97-gpf"/>
+                        <segue destination="ePO-4O-e5u" kind="relationship" relationship="viewControllers" id="bbq-fC-XGz"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="14" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1118" y="1550"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="PuttyConnect_32.png" width="33" height="30"/>
+        <image name="PuttyEnterprise_32.png" width="33" height="27"/>
+        <image name="arrowleft.png" width="26" height="26"/>
+        <image name="arrowright.png" width="26" height="26"/>
+        <image name="clock.png" width="26" height="26"/>
+        <image name="delete.png" width="26" height="26"/>
+        <image name="first.png" width="30" height="30"/>
+        <image name="gateway.png" width="26" height="26"/>
+        <image name="house.png" width="26" height="26"/>
+        <image name="reload.png" width="26" height="26"/>
+        <image name="second.png" width="30" height="30"/>
+    </resources>
+    <color key="tintColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+    <simulatedMetricsContainer key="defaultSimulatedMetrics">
+        <simulatedStatusBarMetrics key="statusBar"/>
+        <simulatedOrientationMetrics key="orientation"/>
+        <simulatedScreenMetrics key="destination"/>
+    </simulatedMetricsContainer>
+</document>
